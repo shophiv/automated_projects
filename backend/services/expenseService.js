@@ -1,4 +1,5 @@
 const Expense = require('../models/Expense');
+const { emitToUser } = require('../sockets/socketManager');
 
 const createExpense = async (userId, expenseData) => {
   const { amount, description, date, category } = expenseData;
@@ -11,7 +12,12 @@ const createExpense = async (userId, expenseData) => {
     category
   });
 
-  return await expense.populate('category', 'name description');
+  const populatedExpense = await expense.populate('category', 'name description');
+
+  // Emit WebSocket event
+  emitToUser(userId, 'expenseCreated', populatedExpense);
+
+  return populatedExpense;
 };
 
 const getExpensesByUserId = async (userId) => {
@@ -62,7 +68,12 @@ const updateExpense = async (expenseId, userId, updateData) => {
 
   await expense.save();
 
-  return await expense.populate('category', 'name description');
+  const populatedExpense = await expense.populate('category', 'name description');
+
+  // Emit WebSocket event
+  emitToUser(userId, 'expenseUpdated', populatedExpense);
+
+  return populatedExpense;
 };
 
 const deleteExpense = async (expenseId, userId) => {
@@ -75,6 +86,9 @@ const deleteExpense = async (expenseId, userId) => {
   }
 
   await expense.deleteOne();
+
+  // Emit WebSocket event
+  emitToUser(userId, 'expenseDeleted', { id: expenseId });
 
   return { id: expenseId, message: 'Expense deleted successfully' };
 };

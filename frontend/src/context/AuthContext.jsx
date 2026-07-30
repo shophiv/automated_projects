@@ -1,67 +1,62 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import API from '../services/api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
+import { initSocket, disconnectSocket } from '../services/socket';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse stored user', e);
-        logout();
+    const verifyUser = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        try {
+          api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          // Fetch categories or a quick auth check route if available, or decode / fetch user
+          // For now, if we have a token, we initialize socket and keep user state
+          const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+          if (storedUser) {
+            setUser(storedUser);
+            setToken(storedToken);
+            initSocket(storedToken);
+          }
+        } catch (error) {
+          console.error('Session verification failed:', error);
+          logout();
+        }
       }
-    }
-    setLoading(false);
-  }, [token]);
+      setLoading(false);
+    };
 
-  const login = async (email, password) => {
-    try {
-      const response = await API.post('/auth/login', { email, password });
-      const { token: newToken, user: userData } = response.data.data;
-      
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      setToken(newToken);
-      setUser(userData);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Login failed'
-      };
-    }
+    verifyUser();
+  }, []);
+
+  const login = (userData, jwtToken) => {
+    localStorage.setItem('token', jwtToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    api.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+    setToken(jwtToken);
+    setUser(userData);
+    initSocket(jwtToken);
   };
 
-  const register = async (email, password) => {
-    try {
-      const response = await API.post('/auth/register', { email, password });
-      const { token: newToken, user: userData } = response.data.data;
-      
-      localStorage.setItem('token', newToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      setToken(newToken);
-      setUser(userData);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Registration failed'
-      };
-    }
+  const register = (userData, jwtToken) => {
+    localStorage.setItem('token', jwtToken);
+    localStorage.setItem('user', JSON.stringify(userData));
+    api.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+    setToken(jwtToken);
+    setUser(userData);
+    initSocket(jwtToken);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    delete api.defaults.headers.common['Authorization'];
+    disconnectSocket();
     setToken(null);
     setUser(null);
   };

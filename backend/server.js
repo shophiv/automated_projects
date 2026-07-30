@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
@@ -8,6 +10,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const { seedCategories } = require('./services/categoryService');
+const { initSocket } = require('./sockets/socketManager');
 
 dotenv.config();
 
@@ -17,6 +20,16 @@ connectDB().then(async () => {
 });
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+  }
+});
+
+// Initialize WebSocket manager
+initSocket(io);
 
 // Middleware
 app.use(cors());
@@ -40,6 +53,6 @@ app.get('/health', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
