@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
 const { seedCategories } = require('./services/categoryService');
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(morgan('dev'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
