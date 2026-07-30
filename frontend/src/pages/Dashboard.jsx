@@ -1,103 +1,95 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseList from '../components/ExpenseList';
-import { LogOut, Wallet } from 'lucide-react';
+import { LogOut, Sparkles, PieChart } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [expenses, setExpenses] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      const res = await API.get('/expenses');
+      setExpenses(res.data.data);
+      setError('');
+    } catch (err) {
+      console.error('Failed to fetch expenses', err);
+      setError('Failed to load expense entries');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [expRes, catRes] = await Promise.all([
-          API.get('/expenses'),
-          API.get('/categories')
-        ]);
-        setExpenses(expRes.data.data);
-        setCategories(catRes.data.data);
-      } catch (err) {
-        console.error('Failed to load dashboard data', err);
-        setError('Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    fetchExpenses();
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const handleExpenseAdded = (newExpense) => {
     setExpenses([newExpense, ...expenses]);
   };
 
-  const totalSpent = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+  const handleExpenseUpdated = (updatedExpense) => {
+    setExpenses(expenses.map(exp => exp._id === updatedExpense._id ? updatedExpense : exp));
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <div className="text-indigo-600 font-medium text-lg">Loading Dashboard...</div>
-      </div>
-    );
-  }
+  const handleExpenseDeleted = (deletedId) => {
+    setExpenses(expenses.filter(exp => exp._id !== deletedId));
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center space-x-3">
-              <Wallet className="w-8 h-8 text-indigo-600" />
-              <span className="font-bold text-xl text-gray-900">AI Expense Tracker</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">Hello, <span className="font-medium">{user?.email}</span></span>
-              <button
-                onClick={logout}
-                className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition"
-              >
-                <LogOut className="w-4 h-4 mr-1.5" /> Logout
-              </button>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <h1 className="text-2xl font-bold text-gray-900">AI Expense Tracker</h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/analytics')}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm"
+            >
+              <Sparkles className="h-4 w-4 mr-2" /> AI Analytics
+            </button>
+            <span className="text-sm font-medium text-gray-700 hidden sm:inline">
+              {user?.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+            >
+              <LogOut className="h-4 w-4 mr-1.5 text-gray-500" /> Logout
+            </button>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-4 sm:px-0">
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <ExpenseForm onExpenseAdded={handleExpenseAdded} />
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 mb-6">
-            <div className="bg-white overflow-hidden shadow rounded-lg p-5">
-              <dt className="text-sm font-medium text-gray-500 truncate">Total Expenses</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">${totalSpent.toFixed(2)}</dd>
-            </div>
-            <div className="bg-white overflow-hidden shadow rounded-lg p-5">
-              <dt className="text-sm font-medium text-gray-500 truncate">Total Transactions</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">{expenses.length}</dd>
-            </div>
-            <div className="bg-white overflow-hidden shadow rounded-lg p-5">
-              <dt className="text-sm font-medium text-gray-500 truncate">Active Categories</dt>
-              <dd className="mt-1 text-3xl font-semibold text-gray-900">{categories.length}</dd>
-            </div>
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+            {error}
           </div>
+        )}
 
-          <ExpenseForm onExpenseAdded={handleExpenseAdded} />
-
-          <ExpenseList 
-            expenses={expenses} 
-            setExpenses={setExpenses} 
-            categories={categories} 
-          />
-        </div>
+        <ExpenseList
+          expenses={expenses}
+          loading={loading}
+          onExpenseUpdated={handleExpenseUpdated}
+          onExpenseDeleted={handleExpenseDeleted}
+        />
       </main>
     </div>
   );
