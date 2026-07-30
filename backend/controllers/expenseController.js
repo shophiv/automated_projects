@@ -35,7 +35,45 @@ const getExpenses = async (req, res) => {
   }
 };
 
+const updateExpense = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const expenseId = req.params.id;
+    const updatedExpense = await expenseService.updateExpense(expenseId, userId, req.body);
+
+    res.status(200).json({
+      status: 'success',
+      data: updatedExpense
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      status: 'fail',
+      message: error.message || 'Error updating expense entry'
+    });
+  }
+};
+
+const deleteExpense = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const expenseId = req.params.id;
+    const result = await expenseService.deleteExpense(expenseId, userId);
+
+    res.status(200).json({
+      status: 'success',
+      data: result
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      status: 'fail',
+      message: error.message || 'Error deleting expense entry'
+    });
+  }
+};
+
 module.exports = {
   createExpense,
-  getExpenses
+  getExpenses,
+  updateExpense,
+  deleteExpense
 };

@@ -8,4 +8,8 @@ router.route('/')
   .post(protect, validateExpense, expenseController.createExpense)
   .get(protect, expenseController.getExpenses);
 
+router.route('/:id')
+  .put(protect, validateExpense, expenseController.updateExpense)
+  .delete(protect, expenseController.deleteExpense);
+
 module.exports = router;
