@@ -4,11 +4,15 @@ const morgan = require('morgan');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const { seedCategories } = require('./services/categoryService');
 
 dotenv.config();
 
-// Connect to database
-connectDB();
+// Connect to database and seed default categories
+connectDB().then(async () => {
+  await seedCategories();
+});
 
 const app = express();
 
@@ -19,6 +23,7 @@ app.use(morgan('dev'));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
