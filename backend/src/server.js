@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const reportingRoutes = require('./routes/reportingRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 connectDB();
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/reports', reportingRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
