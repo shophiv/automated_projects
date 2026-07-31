@@ -5,6 +5,12 @@ const { protect } = require('../middleware/authMiddleware');
 
 router.use(protect);
 
-router.post('/', expenseController.createExpense);
+router.route('/')
+  .get(expenseController.getExpenses)
+  .post(expenseController.createExpense);
+
+router.route('/:id')
+  .put(expenseController.updateExpense)
+  .delete(expenseController.deleteExpense);
 
 module.exports = router;
