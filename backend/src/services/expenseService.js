@@ -1,7 +1,28 @@
 const Expense = require('../models/Expense');
+const Category = require('../models/Category');
+
+const validateCategoryAccess = async (categoryId, userId) => {
+  if (!categoryId) {
+    throw new Error('Please provide a category ID');
+  }
+
+  const category = await Category.findOne({
+    _id: categoryId,
+    $or: [
+      { type: 'predefined' },
+      { userId: userId }
+    ]
+  });
+
+  if (!category) {
+    throw new Error('Invalid category or unauthorized access');
+  }
+
+  return category;
+};
 
 const createExpense = async (userId, expenseData) => {
-  const { amount, description, date } = expenseData;
+  const { amount, description, date, categoryId } = expenseData;
 
   if (amount === undefined || amount === null) {
     throw new Error('Please provide an expense amount');
@@ -11,18 +32,23 @@ const createExpense = async (userId, expenseData) => {
     throw new Error('Expense amount must be a positive number');
   }
 
+  await validateCategoryAccess(categoryId, userId);
+
   const expense = await Expense.create({
     userId,
+    categoryId,
     amount,
     description: description || '',
     date: date ? new Date(date) : Date.now()
   });
 
-  return expense;
+  return await expense.populate('categoryId');
 };
 
 const getExpensesByUserId = async (userId) => {
-  const expenses = await Expense.find({ userId }).sort({ date: -1, createdAt: -1 });
+  const expenses = await Expense.find({ userId })
+    .populate('categoryId')
+    .sort({ date: -1, createdAt: -1 });
   return expenses;
 };
 
@@ -33,7 +59,7 @@ const updateExpense = async (expenseId, userId, updateData) => {
     throw new Error('Expense not found or unauthorized');
   }
 
-  const { amount, description, date } = updateData;
+  const { amount, description, date, categoryId } = updateData;
 
   if (amount !== undefined) {
     if (typeof amount !== 'number' || amount <= 0) {
@@ -50,8 +76,13 @@ const updateExpense = async (expenseId, userId, updateData) => {
     expense.date = new Date(date);
   }
 
+  if (categoryId !== undefined) {
+    await validateCategoryAccess(categoryId, userId);
+    expense.categoryId = categoryId;
+  }
+
   await expense.save();
-  return expense;
+  return await expense.populate('categoryId');
 };
 
 const deleteExpense = async (expenseId, userId) => {
