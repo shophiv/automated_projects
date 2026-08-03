@@ -1,0 +1,12 @@
+.env
+.env.*
+*.pem
+*.key
+node_modules/
+__pycache__/
+planning/
+requirements/
+architecture/
+testing/
+deployment/
+logs/
