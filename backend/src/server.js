@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { connectDB, disconnectDB } = require('./config/db');
+const { connectDB } = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
 
 dotenv.config();
 
@@ -13,6 +14,13 @@ app.use(express.json());
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', message: 'Simple Expense Tracker API is running' });
+});
+
+app.use('/api/auth', authRoutes);
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ success: false, error: 'Internal Server Error' });
 });
 
 async function startServer() {
