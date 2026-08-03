@@ -8,5 +8,7 @@ const router = express.Router();
 router.use(verifyToken);
 
 router.post('/', validateExpense, expenseController.createExpense);
+router.put('/:id', validateExpense, expenseController.updateExpense);
+router.delete('/:id', expenseController.deleteExpense);
 
 module.exports = router;
