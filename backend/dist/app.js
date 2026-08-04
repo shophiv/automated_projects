@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
+const product_routes_1 = __importDefault(require("./modules/product/product.routes"));
 const error_middleware_1 = require("./middleware/error.middleware");
 const database_1 = require("./config/database");
 const app = (0, express_1.default)();
@@ -24,5 +25,6 @@ app.get('/api/v1/health', async (req, res) => {
     }
 });
 app.use('/api/v1/auth', auth_routes_1.default);
+app.use('/api/v1', product_routes_1.default);
 app.use(error_middleware_1.errorHandler);
 exports.default = app;

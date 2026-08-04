@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../types/auth.types';
+import { User, LoginRequest } from '../types/auth.types';
 import { authApi } from '../api/auth.api';
 
 interface AuthContextType {
@@ -7,7 +7,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, tenantId?: number) => Promise<void>;
+  login: (credentials: LoginRequest) => Promise<void>;
   logout: () => void;
 }
 
@@ -19,16 +19,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const initAuth = async () => {
+    const initSession = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (!storedToken) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
-          const data = await authApi.getSession(storedToken);
-          setUser(data.user);
-          setToken(storedToken);
-        }
+        setToken(storedToken);
+        const data = await authApi.getSession();
+        setUser(data.user);
       } catch (error) {
-        console.error('Session restoration failed:', error);
         localStorage.removeItem('token');
         setToken(null);
         setUser(null);
@@ -37,11 +39,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
-    initAuth();
+    initSession();
   }, []);
 
-  const login = async (email: string, password: string, tenantId?: number) => {
-    const data = await authApi.login(email, password, tenantId);
+  const login = async (credentials: LoginRequest) => {
+    const data = await authApi.login(credentials);
     localStorage.setItem('token', data.token);
     setToken(data.token);
     setUser(data.user);
@@ -54,22 +56,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

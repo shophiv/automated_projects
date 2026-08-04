@@ -7,9 +7,17 @@ export interface User {
   updated_at: string;
 }
 
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+export interface LoginRequest {
+  email: string;
+  password: string;
+  tenantId?: number;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+export interface SessionResponse {
+  user: User;
 }

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './modules/auth/auth.routes';
+import productRoutes from './modules/product/product.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { pool } from './config/database';
 
@@ -22,6 +23,7 @@ app.get('/api/v1/health', async (req, res) => {
 });
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1', productRoutes);
 
 app.use(errorHandler);
 
