@@ -1,0 +1,19 @@
+CREATE TABLE IF NOT EXISTS tenants (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  subscription_status VARCHAR(50) NOT NULL DEFAULT 'active',
+  storage_usage BIGINT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  tenant_id INTEGER REFERENCES tenants(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL DEFAULT 'user',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS users_tenant_email_idx ON users (COALESCE(tenant_id, 0), email);
+CREATE INDEX IF NOT EXISTS users_tenant_id_idx ON users (tenant_id);
