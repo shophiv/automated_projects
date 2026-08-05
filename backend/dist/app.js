@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const authRoutes_1 = __importDefault(require("./modules/auth/authRoutes"));
+const productRoutes_1 = __importDefault(require("./modules/products/productRoutes"));
+const inventoryRoutes_1 = __importDefault(require("./modules/inventory/inventoryRoutes"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
@@ -15,6 +17,8 @@ app.get('/health', (req, res) => {
 });
 // API Routes
 app.use('/api/v1/auth', authRoutes_1.default);
+app.use('/api/v1/products', productRoutes_1.default);
+app.use('/api/v1/inventory', inventoryRoutes_1.default);
 // Centralized Error Handler
 app.use((err, req, res, next) => {
     console.error('Unhandled application error:', err);

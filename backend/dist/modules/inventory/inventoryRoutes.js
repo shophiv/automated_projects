@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const inventoryController_1 = require("./inventoryController");
+const authMiddleware_1 = require("../auth/authMiddleware");
+const tenant_1 = require("../../middleware/tenant");
+const router = (0, express_1.Router)();
+const inventoryController = new inventoryController_1.InventoryController();
+router.use(authMiddleware_1.authenticateToken);
+router.use(tenant_1.tenantContextMiddleware);
+router.get('/', inventoryController.getInventory);
+router.put('/:productId', inventoryController.updateInventory);
+exports.default = router;

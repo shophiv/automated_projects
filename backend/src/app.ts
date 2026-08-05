@@ -1,6 +1,8 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import authRoutes from './modules/auth/authRoutes';
+import productRoutes from './modules/products/productRoutes';
+import inventoryRoutes from './modules/inventory/inventoryRoutes';
 
 const app: Application = express();
 
@@ -14,6 +16,8 @@ app.get('/health', (req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/inventory', inventoryRoutes);
 
 // Centralized Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { authService, AuthResponse } from './services/authService';
 import { isValidEmail } from './utils/validation';
+import { ProductManager } from './components/products/ProductManager';
 
 export function App() {
   const [isLogin, setIsLogin] = useState(true);
@@ -42,19 +43,23 @@ export function App() {
 
   if (authData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold text-green-600 mb-4">Workspace Active</h1>
-          <p className="text-gray-700 mb-2">Welcome, <span className="font-semibold">{authData.user.email}</span></p>
-          <p className="text-gray-700 mb-4">Tenant: <span className="font-semibold">{authData.user.tenantName}</span> (ID: {authData.user.tenantId})</p>
-          <p className="text-sm text-gray-500 mb-6">Role: {authData.user.role}</p>
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <header className="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold text-blue-600">Smart Retail POS</h1>
+            <p className="text-xs text-gray-500">Workspace: <span className="font-semibold">{authData.user.tenantName}</span> ({authData.user.email})</p>
+          </div>
           <button
             onClick={() => setAuthData(null)}
-            className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition"
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition text-sm font-semibold"
           >
             Sign Out
           </button>
-        </div>
+        </header>
+
+        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+          <ProductManager token={authData.token} />
+        </main>
       </div>
     );
   }
