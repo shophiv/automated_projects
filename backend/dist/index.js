@@ -8,6 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const auth_routes_js_1 = __importDefault(require("./routes/auth.routes.js"));
 const admin_routes_js_1 = __importDefault(require("./routes/admin.routes.js"));
+const product_routes_js_1 = __importDefault(require("./routes/product.routes.js"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +19,7 @@ app.get('/health', (req, res) => {
 });
 app.use('/api/v1/auth', auth_routes_js_1.default);
 app.use('/api/v1/admin', admin_routes_js_1.default);
+app.use('/api/v1/products', product_routes_js_1.default);
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Internal Server Error' });

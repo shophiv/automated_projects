@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { AdminDashboard } from '../pages/admin/AdminDashboard';
+import { ProductList } from '../pages/products/ProductList';
 
 export const AppRouter: React.FC = () => {
   return (
@@ -9,7 +10,7 @@ export const AppRouter: React.FC = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard" element={<div className="p-8 text-center text-xl">Retailer Workspace Dashboard (Future Phase)</div>} />
+        <Route path="/dashboard" element={<ProductList />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
