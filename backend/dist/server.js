@@ -12,6 +12,8 @@ const rateLimit_middleware_1 = require("./middleware/rateLimit.middleware");
 const error_middleware_1 = require("./middleware/error.middleware");
 const transaction_middleware_1 = require("./middleware/transaction.middleware");
 const auth_routes_1 = __importDefault(require("./modules/auth/auth.routes"));
+const category_routes_1 = __importDefault(require("./modules/categories/category.routes"));
+const product_routes_1 = __importDefault(require("./modules/products/product.routes"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
@@ -32,6 +34,8 @@ app.get('/health', (req, res) => {
 });
 // API Routes
 app.use('/api/v1/auth', auth_routes_1.default);
+app.use('/api/v1/categories', category_routes_1.default);
+app.use('/api/v1/products', product_routes_1.default);
 // Global Error Handler
 app.use(error_middleware_1.errorHandler);
 app.listen(PORT, () => {

@@ -1,9 +1,10 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import { Store, LogOut, LayoutDashboard, ShoppingCart, Users, Settings } from 'lucide-react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Store, LogOut, LayoutDashboard, ShoppingCart, Package, FolderTree, Users, Settings } from 'lucide-react';
 
 export const MainLayout: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
 
@@ -12,6 +13,8 @@ export const MainLayout: React.FC = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
@@ -23,19 +26,57 @@ export const MainLayout: React.FC = () => {
             <span className="text-lg font-bold tracking-wide">Smart Retail</span>
           </div>
           <nav className="p-4 space-y-1">
-            <a href="/dashboard" className="flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+            <a
+              href="/dashboard"
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition ${
+                isActive('/dashboard') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+              }`}
+            >
               <LayoutDashboard className="h-5 w-5 text-indigo-400" />
               <span>Dashboard</span>
             </a>
-            <a href="/pos" className="flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+            <a
+              href="/pos"
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition ${
+                isActive('/pos') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+              }`}
+            >
               <ShoppingCart className="h-5 w-5 text-indigo-400" />
               <span>POS Terminal</span>
             </a>
-            <a href="/team" className="flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+            <a
+              href="/products"
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition ${
+                isActive('/products') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+              }`}
+            >
+              <Package className="h-5 w-5 text-indigo-400" />
+              <span>Products</span>
+            </a>
+            <a
+              href="/categories"
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition ${
+                isActive('/categories') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+              }`}
+            >
+              <FolderTree className="h-5 w-5 text-indigo-400" />
+              <span>Categories</span>
+            </a>
+            <a
+              href="/team"
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition ${
+                isActive('/team') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+              }`}
+            >
               <Users className="h-5 w-5 text-indigo-400" />
               <span>Team & Roles</span>
             </a>
-            <a href="/settings" className="flex items-center space-x-3 px-4 py-2.5 rounded-lg hover:bg-slate-800 transition">
+            <a
+              href="/settings"
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition ${
+                isActive('/settings') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-800 text-slate-300'
+              }`}
+            >
               <Settings className="h-5 w-5 text-indigo-400" />
               <span>Settings</span>
             </a>
@@ -59,7 +100,7 @@ export const MainLayout: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-h-screen">
         <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6">
-          <h1 className="text-xl font-semibold text-slate-800">Workspace Dashboard</h1>
+          <h1 className="text-xl font-semibold text-slate-800">Workspace Management</h1>
           <div className="text-sm text-slate-500">
             Connected Workspace
           </div>

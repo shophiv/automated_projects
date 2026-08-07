@@ -7,6 +7,8 @@ import { apiLimiter } from './middleware/rateLimit.middleware';
 import { errorHandler } from './middleware/error.middleware';
 import { transactionMiddleware } from './middleware/transaction.middleware';
 import authRoutes from './modules/auth/auth.routes';
+import categoryRoutes from './modules/categories/category.routes';
+import productRoutes from './modules/products/product.routes';
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.get('/health', (req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/products', productRoutes);
 
 // Global Error Handler
 app.use(errorHandler);
