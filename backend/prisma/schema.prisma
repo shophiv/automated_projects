@@ -1,0 +1,51 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  CASHIER
+  ADMIN
+}
+
+model Tenant {
+  id              String            @id @default(uuid())
+  business_name   String
+  owner_name      String
+  email           String            @unique
+  phone           String
+  address         String
+  status          String            @default("ACTIVE")
+  storage_used    Float             @default(0)
+  created_at      DateTime          @default(now())
+  users           User[]
+}
+
+model User {
+  id            String    @id @default(uuid())
+  tenant_id     String
+  tenant        Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  name          String
+  email         String    @unique
+  password_hash String
+  role          Role      @default(CASHIER)
+  is_active     Boolean   @default(true)
+  last_login    DateTime?
+  created_at    DateTime  @default(now())
+}
+
+model SubscriptionPlan {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  max_users     Int
+  max_products  Int
+  features_json String
+  price         Float
+  created_at    DateTime @default(now())
+}
