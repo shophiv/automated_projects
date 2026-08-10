@@ -1,62 +1,44 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/database';
 import { connectRedis } from './config/redis';
+import { logger } from './utils/logger';
 import { securityHeadersMiddleware, corsMiddleware, sanitizationMiddleware } from './middleware/security';
 import { apiRateLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/authRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import productRoutes from './routes/productRoutes';
-import { logger } from './utils/logger';
-import { BackupService } from './utils/backup';
+import inventoryRoutes from './routes/inventoryRoutes';
 
 dotenv.config();
 
-const app: Application = express();
+const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security & Parsing Middleware
 app.use(securityHeadersMiddleware);
 app.use(corsMiddleware);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json());
 app.use(sanitizationMiddleware);
 app.use('/api/', apiRateLimiter);
 
-// Health Check Endpoint
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'UP',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
-
-// API Routes
+// Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/inventory', inventoryRoutes);
+app.use('/api/v1/barcode', inventoryRoutes); // barcode endpoints mounted under inventory/barcode as well
+app.use('/api/v1/pricing', inventoryRoutes);
 
-// Global Error Handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  logger.error(err.stack || err.message);
-  res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected internal error occurred.',
-    },
-  });
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
 const startServer = async () => {
   try {
     await connectDatabase();
     await connectRedis();
-    BackupService.scheduleDailyBackup();
-
     app.listen(PORT, () => {
-      logger.info(`Server is running on port ${PORT}`);
+      logger.info(`Server running on port ${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
