@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const posController_1 = require("../controllers/posController");
+const auth_1 = require("../middleware/auth");
+const rbac_1 = require("../middleware/rbac");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.post('/checkout', (0, rbac_1.authorizeRoles)('Owner', 'Manager', 'Cashier'), posController_1.PosController.checkout);
+exports.default = router;
