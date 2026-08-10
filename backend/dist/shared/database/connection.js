@@ -6,13 +6,10 @@ const env_1 = require("../../config/env");
 const logger_1 = require("../../config/logger");
 exports.pool = new pg_1.Pool({
     connectionString: env_1.ENV.DATABASE_URL,
-});
-exports.pool.on('connect', () => {
-    logger_1.logger.debug('Connected to PostgreSQL database');
+    ssl: env_1.ENV.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
 });
 exports.pool.on('error', (err) => {
     logger_1.logger.error('Unexpected error on idle database client', err);
-    process.exit(-1);
 });
 const query = async (text, params) => {
     const start = Date.now();
@@ -23,7 +20,7 @@ const query = async (text, params) => {
         return res;
     }
     catch (error) {
-        logger_1.logger.error('Query error', { text, error });
+        logger_1.logger.error('Database query error', { text, error });
         throw error;
     }
 };

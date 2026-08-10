@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const product_controller_1 = require("./product.controller");
+const auth_middleware_1 = require("../../middleware/auth.middleware");
+const router = (0, express_1.Router)();
+const controller = new product_controller_1.ProductController();
+router.use(auth_middleware_1.authenticateJWT);
+router.get('/', controller.getProducts);
+router.get('/:id', controller.getProductById);
+router.post('/', (0, auth_middleware_1.authorizeRoles)('Owner', 'Manager'), controller.createProduct);
+router.put('/:id', (0, auth_middleware_1.authorizeRoles)('Owner', 'Manager'), controller.updateProduct);
+router.delete('/:id', (0, auth_middleware_1.authorizeRoles)('Owner', 'Manager'), controller.deleteProduct);
+router.post('/:id/duplicate', (0, auth_middleware_1.authorizeRoles)('Owner', 'Manager'), controller.duplicateProduct);
+router.get('/pricing/margins', controller.getMargins);
+router.put('/pricing/margins', (0, auth_middleware_1.authorizeRoles)('Owner', 'Manager'), controller.updateMargins);
+exports.default = router;
