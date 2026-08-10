@@ -5,6 +5,8 @@ import { connectRedis } from './config/redis';
 import { securityHeadersMiddleware, corsMiddleware, sanitizationMiddleware } from './middleware/security';
 import { apiRateLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/authRoutes';
+import categoryRoutes from './routes/categoryRoutes';
+import productRoutes from './routes/productRoutes';
 import { logger } from './utils/logger';
 import { BackupService } from './utils/backup';
 
@@ -32,6 +34,8 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/products', productRoutes);
 
 // Global Error Handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

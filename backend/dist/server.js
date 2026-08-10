@@ -10,6 +10,8 @@ const redis_1 = require("./config/redis");
 const security_1 = require("./middleware/security");
 const rateLimiter_1 = require("./middleware/rateLimiter");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
+const categoryRoutes_1 = __importDefault(require("./routes/categoryRoutes"));
+const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
 const logger_1 = require("./utils/logger");
 const backup_1 = require("./utils/backup");
 dotenv_1.default.config();
@@ -32,6 +34,8 @@ app.get('/health', (_req, res) => {
 });
 // API Routes
 app.use('/api/v1/auth', authRoutes_1.default);
+app.use('/api/v1/categories', categoryRoutes_1.default);
+app.use('/api/v1/products', productRoutes_1.default);
 // Global Error Handler
 app.use((err, _req, res, _next) => {
     logger_1.logger.error(err.stack || err.message);

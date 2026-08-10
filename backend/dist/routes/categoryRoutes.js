@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const categoryController_1 = require("../controllers/categoryController");
+const auth_1 = require("../middleware/auth");
+const rbac_1 = require("../middleware/rbac");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.get('/', categoryController_1.CategoryController.list);
+router.post('/', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), categoryController_1.CategoryController.create);
+router.put('/:id', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), categoryController_1.CategoryController.update);
+router.delete('/:id', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), categoryController_1.CategoryController.archive);
+exports.default = router;

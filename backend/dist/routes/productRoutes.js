@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const productController_1 = require("../controllers/productController");
+const auth_1 = require("../middleware/auth");
+const rbac_1 = require("../middleware/rbac");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.get('/', productController_1.ProductController.list);
+router.post('/', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), productController_1.ProductController.create);
+router.put('/:id', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), productController_1.ProductController.update);
+router.delete('/:id', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), productController_1.ProductController.archive);
+router.post('/:id/duplicate', (0, rbac_1.authorizeRoles)('Owner', 'Manager'), productController_1.ProductController.duplicate);
+exports.default = router;
