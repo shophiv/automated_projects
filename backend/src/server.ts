@@ -1,8 +1,9 @@
-import express from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/database';
 import { connectRedis } from './config/redis';
-import { securityHeadersMiddleware, corsMiddleware, sanitizationMiddleware } from './middleware/security';
+import securityMiddleware from './middleware/security';
 import { apiRateLimiter } from './middleware/rateLimiter';
 import authRoutes from './routes/authRoutes';
 import categoryRoutes from './routes/categoryRoutes';
@@ -12,22 +13,30 @@ import posRoutes from './routes/posRoutes';
 import salesRoutes from './routes/salesRoutes';
 import supplierRoutes from './routes/supplierRoutes';
 import purchaseOrderRoutes from './routes/purchaseOrderRoutes';
+import { dashboardRoutes } from './routes/dashboardRoutes';
+import { analyticsRoutes } from './routes/analyticsRoutes';
+import { accountingRoutes } from './routes/accountingRoutes';
+import { reportRoutes } from './routes/reportRoutes';
 import { logger } from './utils/logger';
 
 dotenv.config();
 
-const app = express();
-const port = process.env.PORT || 4000;
+const app: Application = express();
+const PORT = process.env.PORT || 5000;
 
-app.use(securityHeadersMiddleware);
-app.use(corsMiddleware);
-app.use(express.json({ limit: '10mb' }));
-app.use(sanitizationMiddleware);
+securityMiddleware(app);
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', apiRateLimiter);
+app.use('/api/', apiRateLimiter);
 
-app.get('/health', async (req, res) => {
-  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
+app.get('/health', async (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 app.use('/api/v1/auth', authRoutes);
@@ -38,13 +47,17 @@ app.use('/api/v1/pos', posRoutes);
 app.use('/api/v1/sales', salesRoutes);
 app.use('/api/v1/suppliers', supplierRoutes);
 app.use('/api/v1/purchase-orders', purchaseOrderRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/accounting', accountingRoutes);
+app.use('/api/v1/reports', reportRoutes);
 
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error(err.stack || err.message);
-  res.status(500).json({
+  res.status(err.status || 500).json({
     success: false,
     error: {
-      code: 'INTERNAL_SERVER_ERROR',
+      code: err.code || 'INTERNAL_SERVER_ERROR',
       message: err.message || 'An unexpected error occurred',
     },
   });
@@ -55,8 +68,8 @@ const startServer = async () => {
     await connectDatabase();
     await connectRedis();
 
-    app.listen(port, () => {
-      logger.info(`Server running on port ${port}`);
+    app.listen(PORT, () => {
+      logger.info(`Server is running on port ${PORT}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

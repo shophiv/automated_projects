@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sanitizationMiddleware = exports.corsMiddleware = exports.securityHeadersMiddleware = void 0;
+exports.default = securityMiddleware;
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
 exports.securityHeadersMiddleware = (0, helmet_1.default)();
@@ -17,7 +18,6 @@ const sanitizationMiddleware = (req, res, next) => {
     if (req.body && typeof req.body === 'object') {
         for (const key of Object.keys(req.body)) {
             if (typeof req.body[key] === 'string') {
-                // Strip out dangerous tags if needed or keep raw depending on Zod schemas
                 req.body[key] = req.body[key].trim();
             }
         }
@@ -25,3 +25,6 @@ const sanitizationMiddleware = (req, res, next) => {
     next();
 };
 exports.sanitizationMiddleware = sanitizationMiddleware;
+function securityMiddleware(app) {
+    app.use((0, helmet_1.default)());
+}

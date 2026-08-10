@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.accountingRoutes = void 0;
+const express_1 = require("express");
+const accountingController_1 = require("../controllers/accountingController");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.get('/entries', accountingController_1.AccountingController.listEntries);
+router.post('/expenses', accountingController_1.AccountingController.recordExpense);
+router.get('/summary', accountingController_1.AccountingController.getSummary);
+exports.accountingRoutes = router;

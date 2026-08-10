@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
@@ -10,41 +10,54 @@ import { PosPage } from './pages/retailer/pos/PosPage';
 import { SalesPage } from './pages/retailer/sales/SalesPage';
 import { SuppliersPage } from './pages/retailer/suppliers/SuppliersPage';
 import { PurchasesPage } from './pages/retailer/purchases/PurchasesPage';
+import { DashboardPage } from './pages/retailer/dashboard/DashboardPage';
+import { AnalyticsPage } from './pages/retailer/analytics/AnalyticsPage';
+import { AccountingPage } from './pages/retailer/accounting/AccountingPage';
+import { ReportsPage } from './pages/retailer/reports/ReportsPage';
+import { apiClient } from './services/apiClient';
 
 const RetailerLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <nav className="bg-white shadow-sm border-b px-6 py-3 flex justify-between items-center">
-        <div className="flex items-center space-x-6">
-          <span className="font-bold text-xl text-indigo-600">SmartRetail POS</span>
-          <div className="flex space-x-4 text-sm font-medium text-gray-600">
-            <Link to="/pos" className="hover:text-indigo-600">POS Checkout</Link>
-            <Link to="/products" className="hover:text-indigo-600">Products</Link>
-            <Link to="/categories" className="hover:text-indigo-600">Categories</Link>
-            <Link to="/inventory" className="hover:text-indigo-600">Inventory</Link>
-            <Link to="/sales" className="hover:text-indigo-600">Sales History</Link>
-            <Link to="/suppliers" className="hover:text-indigo-600">Suppliers</Link>
-            <Link to="/purchases" className="hover:text-indigo-600">Purchase Orders</Link>
-          </div>
+    <div className="flex h-screen bg-gray-100">
+      <aside className="w-64 bg-slate-800 text-white flex flex-col">
+        <div className="p-5 text-xl font-bold tracking-wider border-b border-slate-700">Smart Retail POS</div>
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <Link to="/dashboard" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Dashboard</Link>
+          <Link to="/pos" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Point of Sale (POS)</Link>
+          <Link to="/products" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Products Catalog</Link>
+          <Link to="/categories" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Categories</Link>
+          <Link to="/inventory" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Inventory & Stock</Link>
+          <Link to="/sales" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Sales History</Link>
+          <Link to="/suppliers" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Suppliers</Link>
+          <Link to="/purchases" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Purchase Orders</Link>
+          <Link to="/analytics" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Analytics & AI</Link>
+          <Link to="/accounting" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Accounting</Link>
+          <Link to="/reports" className="block px-4 py-2.5 rounded hover:bg-slate-700 font-medium">Reports & Export</Link>
+        </nav>
+        <div className="p-4 border-t border-slate-700">
+          <button onClick={handleLogout} className="w-full bg-rose-600 py-2 rounded text-sm font-medium hover:bg-rose-700">
+            Logout
+          </button>
         </div>
-        <button
-          onClick={() => {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-          }}
-          className="text-sm text-red-600 hover:text-red-800 font-medium"
-        >
-          Logout
-        </button>
-      </nav>
-      <main className="flex-1">{children}</main>
+      </aside>
+      <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 };
 
-export const App: React.FC = () => {
-  const isAuthenticated = !!localStorage.getItem('token');
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const token = localStorage.getItem('token');
+  return token ? <RetailerLayout>{children}</RetailerLayout> : <Navigate to="/login" />;
+};
 
+export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
@@ -52,92 +65,19 @@ export const App: React.FC = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-        <Route
-          path="/pos"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <PosPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <ProductsPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/categories"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <CategoriesPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/inventory"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <InventoryPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/sales"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <SalesPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-      path="/suppliers"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <SuppliersPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-        <Route
-          path="/purchases"
-          element={
-            isAuthenticated ? (
-              <RetailerLayout>
-                <PurchasesPage />
-              </RetailerLayout>
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+        <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+        <Route path="/pos" element={<PrivateRoute><PosPage /></PrivateRoute>} />
+        <Route path="/products" element={<PrivateRoute><ProductsPage /></PrivateRoute>} />
+        <Route path="/categories" element={<PrivateRoute><CategoriesPage /></PrivateRoute>} />
+        <Route path="/inventory" element={<PrivateRoute><InventoryPage /></PrivateRoute>} />
+        <Route path="/sales" element={<PrivateRoute><SalesPage /></PrivateRoute>} />
+        <Route path="/suppliers" element={<PrivateRoute><SuppliersPage /></PrivateRoute>} />
+        <Route path="/purchases" element={<PrivateRoute><PurchasesPage /></PrivateRoute>} />
+        <Route path="/analytics" element={<PrivateRoute><AnalyticsPage /></PrivateRoute>} />
+        <Route path="/accounting" element={<PrivateRoute><AccountingPage /></PrivateRoute>} />
+        <Route path="/reports" element={<PrivateRoute><ReportsPage /></PrivateRoute>} />
 
-        <Route path="*" element={<Navigate to={isAuthenticated ? '/pos' : '/login'} />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );

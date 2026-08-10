@@ -15,10 +15,13 @@ export const sanitizationMiddleware = (req: Request, res: Response, next: NextFu
   if (req.body && typeof req.body === 'object') {
     for (const key of Object.keys(req.body)) {
       if (typeof req.body[key] === 'string') {
-        // Strip out dangerous tags if needed or keep raw depending on Zod schemas
         req.body[key] = req.body[key].trim();
       }
     }
   }
   next();
 };
+
+export default function securityMiddleware(app: any) {
+  app.use(helmet());
+}
