@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const analytics_controller_1 = require("./analytics.controller");
+const auth_middleware_1 = require("../../middleware/auth.middleware");
+const rbac_middleware_1 = require("../../middleware/rbac.middleware");
+const router = (0, express_1.Router)();
+const analyticsController = new analytics_controller_1.AnalyticsController();
+router.use(auth_middleware_1.verifyToken);
+router.get('/sales', analyticsController.getSalesHistory);
+router.get('/sales/:id', analyticsController.getSaleById);
+router.post('/sales/:id/refund', (0, rbac_middleware_1.requireRole)(['Owner', 'Manager']), analyticsController.processRefund);
+router.post('/sales/:id/reprint', analyticsController.reprintInvoice);
+router.get('/analytics/sales', analyticsController.getSalesAnalytics);
+router.get('/analytics/predictions', analyticsController.getSalesPredictions);
+exports.default = router;

@@ -14,6 +14,9 @@ const pricing_routes_1 = __importDefault(require("./modules/pricing/pricing.rout
 const inventory_routes_1 = __importDefault(require("./modules/inventory/inventory.routes"));
 const pos_routes_1 = __importDefault(require("./modules/pos/pos.routes"));
 const po_routes_1 = __importDefault(require("./modules/suppliers/po.routes"));
+const analytics_routes_1 = __importDefault(require("./modules/analytics/analytics.routes"));
+const accounting_routes_1 = __importDefault(require("./modules/accounting/accounting.routes"));
+const report_routes_1 = __importDefault(require("./modules/reports/report.routes"));
 const rateLimit_middleware_1 = require("./middleware/rateLimit.middleware");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -34,6 +37,9 @@ app.use('/api/v1/pricing', pricing_routes_1.default);
 app.use('/api/v1/inventory', inventory_routes_1.default);
 app.use('/api/v1/pos', pos_routes_1.default);
 app.use('/api/v1/purchase-orders', po_routes_1.default);
+app.use('/api/v1/analytics', analytics_routes_1.default);
+app.use('/api/v1/accounting', accounting_routes_1.default);
+app.use('/api/v1/reports', report_routes_1.default);
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
