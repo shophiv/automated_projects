@@ -7,6 +7,8 @@ import productRoutes from './modules/products/product.routes';
 import supplierRoutes from './modules/suppliers/supplier.routes';
 import pricingRoutes from './modules/pricing/pricing.routes';
 import inventoryRoutes from './modules/inventory/inventory.routes';
+import posRoutes from './modules/pos/pos.routes';
+import poRoutes from './modules/suppliers/po.routes';
 import { limiter } from './middleware/rateLimit.middleware';
 
 dotenv.config();
@@ -30,6 +32,8 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/suppliers', supplierRoutes);
 app.use('/api/v1/pricing', pricingRoutes);
 app.use('/api/v1/inventory', inventoryRoutes);
+app.use('/api/v1/pos', posRoutes);
+app.use('/api/v1/purchase-orders', poRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
