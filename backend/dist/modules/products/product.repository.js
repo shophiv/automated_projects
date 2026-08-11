@@ -15,20 +15,20 @@ class ProductRepository {
     `;
         const result = await database_1.pool.query(query, [
             retailerId,
-            data.categoryId || null,
+            data.categoryId,
             data.supplierId || null,
             data.name,
             data.sku,
             data.barcode || null,
             data.brand || null,
-            data.purchasePrice || 0.00,
-            data.sellingPrice || 0.00,
-            data.profitMargin || 0.00,
-            data.taxRate || 0.00,
+            data.purchasePrice,
+            data.sellingPrice,
+            data.profitMargin,
+            data.taxRate || 0,
             data.unit || 'pcs',
             data.quantity || 0,
             data.minStock || 5,
-            data.maxStock || 1000,
+            data.maxStock || 100,
             data.imageUrl || null,
             data.description || null,
             data.status || 'active'
@@ -57,19 +57,22 @@ class ProductRepository {
         const params = [retailerId];
         let paramIndex = 2;
         if (queryParams.search) {
-            query += ` AND (p.name ILIKE $${paramIndex} OR p.sku ILIKE $${paramIndex} OR p.barcode = $${paramIndex})`;
+            query += ` AND (p.name ILIKE $${paramIndex} OR p.sku ILIKE $${paramIndex} OR p.barcode ILIKE $${paramIndex} OR to_tsvector('english', p.name) @@ plainto_tsquery('english', $${paramIndex}))`;
             params.push(`%${queryParams.search}%`);
             paramIndex++;
         }
         if (queryParams.categoryId) {
-            query += ` AND p.category_id = $${paramIndex}`;
-            params.push(queryParams.categoryId);
-            paramIndex++;
+            query += ` AND p.category_id = $${paramIndex++}`;
+            params.push(parseInt(queryParams.categoryId, 10));
+        }
+        if (queryParams.status) {
+            query += ` AND p.status = $${paramIndex++}`;
+            params.push(queryParams.status);
         }
         query += ` ORDER BY p.name ASC`;
         const limit = queryParams.limit ? parseInt(queryParams.limit, 10) : 50;
         const offset = queryParams.offset ? parseInt(queryParams.offset, 10) : 0;
-        query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex++}`;
         params.push(limit, offset);
         const result = await database_1.pool.query(query, params);
         return result.rows;
@@ -127,42 +130,6 @@ class ProductRepository {
       RETURNING id
     `;
         const result = await database_1.pool.query(query, [productId, retailerId]);
-        return result.rows[0];
-    }
-    async duplicate(productId, retailerId) {
-        const product = await this.findById(productId, retailerId);
-        if (!product)
-            return null;
-        const newSku = `${product.sku}-COPY-${Math.floor(Math.random() * 1000)}`;
-        const newName = `${product.name} (Copy)`;
-        const query = `
-      INSERT INTO products (
-        retailer_id, category_id, supplier_id, name, sku, barcode, brand,
-        purchase_price, selling_price, profit_margin, tax_rate, unit,
-        quantity, min_stock, max_stock, image_url, description, status
-      )
-      VALUES ($1, $2, $3, $4, $5, NULL, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-      RETURNING *
-    `;
-        const result = await database_1.pool.query(query, [
-            retailerId,
-            product.category_id,
-            product.supplier_id,
-            newName,
-            newSku,
-            product.brand,
-            product.purchase_price,
-            product.selling_price,
-            product.profit_margin,
-            product.tax_rate,
-            product.unit,
-            0, // new copy starts with 0 inventory or same quantity depending on policy, let's set 0
-            product.min_stock,
-            product.max_stock,
-            product.image_url,
-            product.description,
-            product.status
-        ]);
         return result.rows[0];
     }
 }
