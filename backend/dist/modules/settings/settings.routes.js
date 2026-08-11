@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const settings_controller_1 = require("./settings.controller");
+const auth_middleware_1 = require("../../middleware/auth.middleware");
+const rbac_middleware_1 = require("../../middleware/rbac.middleware");
+const router = (0, express_1.Router)();
+const settingsController = new settings_controller_1.SettingsController();
+router.use(auth_middleware_1.verifyToken);
+router.get('/', settingsController.getSettings);
+router.put('/', (0, rbac_middleware_1.requireRole)(['Owner', 'Manager']), settingsController.updateSettings);
+exports.default = router;
