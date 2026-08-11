@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-export const authorizeRoles = (...allowedRoles: Array<'Owner' | 'Manager' | 'Cashier'>) => {
+export const authorizeRoles = (...allowedRoles: Array<'Owner' | 'Manager' | 'Cashier' | 'platform_admin'>) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({

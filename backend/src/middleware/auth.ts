@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 export interface TokenPayload {
   userId: string;
   tenantId: string;
-  role: 'Owner' | 'Manager' | 'Cashier';
+  role: 'Owner' | 'Manager' | 'Cashier' | 'platform_admin';
   email: string;
 }
 
@@ -21,22 +21,23 @@ export const authenticateJwt = (req: Request, res: Response, next: NextFunction)
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({
       success: false,
-      error: { code: 'UNAUTHORIZED', message: 'Missing or malformed authorization token' },
+      error: { code: 'UNAUTHORIZED', message: 'No token provided' },
     });
     return;
   }
 
   const token = authHeader.split(' ')[1];
-  const secret = process.env.JWT_SECRET || 'supersecretjwtkeychangeinproduction';
-
   try {
-    const payload = jwt.verify(token, secret) as TokenPayload;
-    req.user = payload;
+    const jwtSecret = process.env.JWT_SECRET || 'supersecretjwtkeychangeinproduction';
+    const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
+    req.user = decoded;
     next();
   } catch (error) {
-    res.status(403).json({
+    res.status(401).json({
       success: false,
       error: { code: 'INVALID_TOKEN', message: 'Token is invalid or expired' },
     });
   }
 };
+
+export const authMiddleware = authenticateJwt;

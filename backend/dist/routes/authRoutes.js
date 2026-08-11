@@ -9,5 +9,5 @@ router.post('/register', rateLimiter_1.authRateLimiter, authController_1.AuthCon
 router.post('/login', rateLimiter_1.authRateLimiter, authController_1.AuthController.login);
 router.post('/forgot-password', rateLimiter_1.authRateLimiter, authController_1.AuthController.forgotPassword);
 router.post('/reset-password', rateLimiter_1.authRateLimiter, authController_1.AuthController.resetPassword);
-router.get('/me', auth_1.authenticateJwt, authController_1.AuthController.getMe);
+router.get('/me', auth_1.authMiddleware, authController_1.AuthController.getMe);
 exports.default = router;
