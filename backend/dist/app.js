@@ -19,6 +19,7 @@ const accounting_routes_1 = __importDefault(require("./modules/accounting/accoun
 const report_routes_1 = __importDefault(require("./modules/reports/report.routes"));
 const notification_routes_1 = __importDefault(require("./modules/notifications/notification.routes"));
 const settings_routes_1 = __importDefault(require("./modules/settings/settings.routes"));
+const admin_routes_1 = __importDefault(require("./modules/admin/admin.routes"));
 const rateLimit_middleware_1 = require("./middleware/rateLimit.middleware");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -44,6 +45,7 @@ app.use('/api/v1/accounting', accounting_routes_1.default);
 app.use('/api/v1/reports', report_routes_1.default);
 app.use('/api/v1/notifications', notification_routes_1.default);
 app.use('/api/v1/settings', settings_routes_1.default);
+app.use('/api/v1/admin', admin_routes_1.default);
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);

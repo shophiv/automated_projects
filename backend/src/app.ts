@@ -14,6 +14,7 @@ import accountingRoutes from './modules/accounting/accounting.routes';
 import reportRoutes from './modules/reports/report.routes';
 import notificationRoutes from './modules/notifications/notification.routes';
 import settingsRoutes from './modules/settings/settings.routes';
+import adminRoutes from './modules/admin/admin.routes';
 import { limiter } from './middleware/rateLimit.middleware';
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/v1/accounting', accountingRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/settings', settingsRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

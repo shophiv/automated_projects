@@ -1,0 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const admin_controller_1 = require("./admin.controller");
+const auth_middleware_1 = require("../../middleware/auth.middleware");
+const rbac_middleware_1 = require("../../middleware/rbac.middleware");
+const router = (0, express_1.Router)();
+const adminController = new admin_controller_1.AdminController();
+// All admin routes require authentication and Admin role (or Owner acting as super admin)
+router.use(auth_middleware_1.verifyToken);
+router.use((0, rbac_middleware_1.requireRole)(['Admin', 'Owner']));
+router.get('/retailers', adminController.getRetailersList);
+router.put('/retailers/:id/status', adminController.updateRetailerStatus);
+router.delete('/retailers/:id', adminController.deleteRetailer);
+router.post('/retailers/:id/reset-password', adminController.resetRetailerPassword);
+router.get('/subscriptions', adminController.getSubscriptions);
+router.put('/subscriptions/:id', adminController.updateSubscriptionPlan);
+router.get('/analytics', adminController.getPlatformAnalytics);
+router.get('/support/logs', adminController.getSupportLogs);
+router.post('/support/broadcast', adminController.broadcastAnnouncement);
+exports.default = router;
