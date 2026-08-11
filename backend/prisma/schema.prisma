@@ -1,0 +1,84 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  CASHIER
+}
+
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+model Tenant {
+  id              String       @id @default(uuid())
+  business_name   String
+  owner_name      String
+  email           String       @unique
+  phone           String
+  address         String
+  subscription_id String       @default("free")
+  status          TenantStatus @default(PENDING)
+  storage_used    Float        @default(0.0)
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  users       User[]
+  audit_logs  AuditLog[]
+
+  @@map("tenants")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  tenant_id     String
+  name          String
+  email         String    @unique
+  password_hash String
+  role          Role      @default(CASHIER)
+  phone         String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  audit_logs AuditLog[]
+
+  @@index([tenant_id])
+  @@map("users")
+}
+
+model Admin {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  name          String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  tenant_id  String?
+  user_id    String?
+  action     String
+  details    String?
+  timestamp  DateTime @default(now())
+
+  tenant Tenant? @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([tenant_id])
+  @@map("audit_logs")
+}
