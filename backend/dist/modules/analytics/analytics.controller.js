@@ -16,6 +16,24 @@ class AnalyticsController {
             res.status(500).json({ error: err.message });
         }
     };
+    exportSalesStatistics = async (req, res) => {
+        try {
+            const retailerId = req.user.retailerId;
+            const format = req.query.format || 'json';
+            const exportResult = await this.analyticsService.exportSalesStatistics(retailerId, req.query, format);
+            if (format === 'csv') {
+                res.setHeader('Content-Type', 'text/csv');
+                res.setHeader('Content-Disposition', `attachment; filename="${exportResult.filename}"`);
+                res.status(200).send(exportResult.data);
+            }
+            else {
+                res.status(200).json(exportResult);
+            }
+        }
+        catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    };
     getSaleById = async (req, res) => {
         try {
             const retailerId = req.user.retailerId;
@@ -68,6 +86,7 @@ class AnalyticsController {
         }
         catch (err) {
             res.status(500).json({ error: err.message });
+            5;
         }
     };
 }

@@ -8,6 +8,7 @@ const router = (0, express_1.Router)();
 const analyticsController = new analytics_controller_1.AnalyticsController();
 router.use(auth_middleware_1.verifyToken);
 router.get('/sales', analyticsController.getSalesHistory);
+router.get('/sales/export', analyticsController.exportSalesStatistics);
 router.get('/sales/:id', analyticsController.getSaleById);
 router.post('/sales/:id/refund', (0, rbac_middleware_1.requireRole)(['Owner', 'Manager']), analyticsController.processRefund);
 router.post('/sales/:id/reprint', analyticsController.reprintInvoice);

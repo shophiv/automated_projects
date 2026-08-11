@@ -17,6 +17,24 @@ export class AnalyticsController {
     }
   };
 
+  exportSalesStatistics = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const retailerId = req.user!.retailerId;
+      const format = (req.query.format as string) || 'json';
+      const exportResult = await this.analyticsService.exportSalesStatistics(retailerId, req.query, format);
+
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${exportResult.filename}"`);
+        res.status(200).send(exportResult.data);
+      } else {
+        res.status(200).json(exportResult);
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+
   getSaleById = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const retailerId = req.user!.retailerId;
@@ -68,6 +86,6 @@ export class AnalyticsController {
       res.status(200).json(predictions);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
-    }
+5    }
   };
 }

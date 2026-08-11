@@ -39,6 +39,38 @@ export class AnalyticsRepository {
     return result.rows;
   }
 
+  async getSalesForExport(retailerId: number, queryParams: { startDate?: string; endDate?: string; status?: string }) {
+    let query = `
+      SELECT s.id, s.invoice_number, s.customer_name, s.total_amount, s.tax_amount, s.discount_amount, s.total_profit, s.payment_method, s.status, s.created_at,
+             u.name as cashier_name
+      FROM sales s
+      LEFT JOIN users u ON s.cashier_id = u.id
+      WHERE s.retailer_id = $1
+    `;
+    const params: any[] = [retailerId];
+    let paramIndex = 2;
+
+    if (queryParams.startDate) {
+      query += ` AND s.created_at >= $${paramIndex++}`;
+      params.push(queryParams.startDate);
+    }
+
+    if (queryParams.endDate) {
+      query += ` AND s.created_at <= $${paramIndex++}`;
+      params.push(queryParams.endDate);
+    }
+
+    if (queryParams.status) {
+      query += ` AND s.status = $${paramIndex++}`;
+      params.push(queryParams.status);
+    }
+
+    query += ` ORDER BY s.created_at DESC`;
+
+    const result = await pool.query(query, params);
+    return result.rows;
+  }
+
   async getSaleById(retailerId: number, saleId: number) {
     const saleQuery = `
       SELECT s.*, u.name as cashier_name
@@ -75,7 +107,6 @@ export class AnalyticsRepository {
   }
 
   async getAnalyticsSummary(retailerId: number, timeframe: string) {
-    // Timeframe can be day, week, month, year
     let interval = '30 days';
     if (timeframe === 'day') interval = '1 day';
     if (timeframe === 'week') interval = '7 days';
