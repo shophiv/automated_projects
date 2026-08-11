@@ -30,11 +30,14 @@ model Tenant {
   subscription_id String       @default("free")
   status          TenantStatus @default(PENDING)
   storage_used    Float        @default(0.0)
+  global_margin   Float        @default(20.0)
   created_at      DateTime     @default(now())
   updated_at      DateTime     @updatedAt
 
   users       User[]
   audit_logs  AuditLog[]
+  categories  Category[]
+  products    Product[]
 
   @@map("tenants")
 }
@@ -81,4 +84,57 @@ model AuditLog {
 
   @@index([tenant_id])
   @@map("audit_logs")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  name        String
+  description String?
+  profit_margin Float?
+  archived    Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@index([tenant_id])
+  @@map("categories")
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  tenant_id      String
+  category_id    String?
+  supplier_id    String?
+  name           String
+  sku            String
+  barcode        String?
+  brand          String?
+  purchase_price Float    @default(0.0)
+  selling_price  Float    @default(0.0)
+  wholesale_price Float   @default(0.0)
+  discount_price Float    @default(0.0)
+  tax_rate       Float    @default(0.0)
+  profit_margin  Float?
+  unit           String   @default("pcs")
+  quantity       Float    @default(0.0)
+  min_stock      Float    @default(5.0)
+  max_stock      Float    @default(100.0)
+  image_url      String?
+  description    String?
+  active_status  Boolean  @default(true)
+  archived       Boolean  @default(false)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+
+  @@index([tenant_id])
+  @@index([sku])
+  @@index([barcode])
+  @@index([category_id])
+  @@map("products")
 }

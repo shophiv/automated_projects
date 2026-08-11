@@ -7,6 +7,8 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const auth_routes_1 = require("./modules/auth/auth.routes");
 const admin_routes_1 = require("./modules/admin/admin.routes");
+const category_routes_1 = require("./modules/categories/category.routes");
+const product_routes_1 = require("./modules/products/product.routes");
 const error_middleware_1 = require("./middleware/error.middleware");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
@@ -16,5 +18,7 @@ app.get('/health', (req, res) => {
 });
 app.use('/api/v1/auth', auth_routes_1.authRoutes);
 app.use('/api/v1/admin', admin_routes_1.adminRoutes);
+app.use('/api/v1/categories', category_routes_1.categoryRoutes);
+app.use('/api/v1/products', product_routes_1.productRoutes);
 app.use(error_middleware_1.errorMiddleware);
 exports.default = app;
